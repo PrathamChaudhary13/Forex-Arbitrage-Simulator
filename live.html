@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live market - Forex arbitrage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Forex arbitrage simulator</h1>
+  <p>Bellman-Ford on <code>-log(rate)</code> weights. A negative cycle means the product of exchange rates around a loop is greater than 1.</p>
+  <nav aria-label="Pages">
+    <a href="index.html">Simulator</a>
+    <a href="live.html" class="active" aria-current="page">Live market</a>
+    <a href="visual.html">Visual explainer</a>
+    <a href="theory.html">Theory</a>
+  </nav>
+</header>
+
+<main class="vgrid">
+  <section class="panel">
+    <h2>Live data</h2>
+    <label for="mode">Market</label>
+    <select id="mode">
+      <option value="forex">Forex (triangular and longer loops)</option>
+      <option value="crypto">Cryptocurrency triangular</option>
+      <option value="cross">Cross-exchange (Bitcoin)</option>
+    </select>
+    <div id="curBox" style="margin-top:10px">
+      <label for="cur">Currencies (3 to 8 codes)</label>
+      <input id="cur" value="USD EUR GBP JPY INR CHF">
+    </div>
+    <div class="row">
+      <div style="flex:1"><label for="fee">Fee per trade (%)</label><input id="fee" type="number" step="0.01" min="0" value="0.10"></div>
+      <div style="flex:1" id="noiseBox"><label for="noise">Simulated noise (±%)</label><input id="noise" type="number" step="0.05" min="0" value="0"></div>
+    </div>
+    <div class="row">
+      <button id="fetch" class="primary">Fetch live rates</button>
+      <button id="rerun" class="ghost" disabled>Re-run with settings</button>
+    </div>
+    <p id="msg" role="alert"></p>
+    <p id="status" class="status">No data yet.</p>
+    <div class="note" style="font-size:13px">
+      <b>Read this before judging the results.</b> Real markets close arbitrage within milliseconds, and free APIs give delayed mid prices. Expect <i>no arbitrage</i> on live data, especially after fees. Use the noise setting to simulate a dealer quoting a wrong price, so you can see detection work.
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Result</h2>
+    <div id="verdict" class="verdict">Fetch rates to begin.</div>
+    <svg id="loop" viewBox="0 0 400 300" style="width:100%;height:auto;background:var(--bg);border-radius:8px;margin-top:10px" role="img" aria-label="Best trading loop"></svg>
+    <ol id="trades"></ol>
+  </section>
+
+  <section class="panel wide">
+    <h2>Rates used</h2>
+    <p style="color:var(--muted);margin-top:0">Row currency → column currency, after fee and noise.</p>
+    <div style="overflow-x:auto"><table id="matrix"></table></div>
+  </section>
+</main>
+<script src="algo.js"></script>
+<script src="live.js"></script>
+</body>
+</html>

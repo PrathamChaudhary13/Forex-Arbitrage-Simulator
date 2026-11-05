@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visual explainer - Forex arbitrage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Forex arbitrage simulator</h1>
+  <p>Bellman-Ford on <code>-log(rate)</code> weights. A negative cycle means the product of exchange rates around a loop is greater than 1.</p>
+  <nav aria-label="Pages">
+    <a href="index.html">Simulator</a>
+    <a href="live.html">Live market</a>
+    <a href="visual.html" class="active" aria-current="page">Visual explainer</a>
+    <a href="theory.html">Theory</a>
+  </nav>
+</header>
+<main class="vgrid">
+  <section class="panel">
+    <h2>1. Change the rates, watch the loop</h2>
+    <p style="color:var(--muted);margin-top:0">Each slider is the rate you get for one trade. Drag them until the loop turns red.</p>
+    <div class="slider"><label for="r1">USD → EUR</label><input id="r1" type="range" min="0.5" max="1.5" step="0.001" value="0.9"><output id="o1"></output></div>
+    <div class="slider"><label for="r2">EUR → GBP</label><input id="r2" type="range" min="0.5" max="1.5" step="0.001" value="0.86"><output id="o2"></output></div>
+    <div class="slider"><label for="r3">GBP → USD</label><input id="r3" type="range" min="0.5" max="1.5" step="0.001" value="1.3"><output id="o3"></output></div>
+    <svg id="tri" viewBox="0 0 400 300" style="width:100%;height:auto;background:var(--bg);border-radius:8px" role="img" aria-label="Triangle of three currencies"></svg>
+  </section>
+
+  <section class="panel">
+    <h2>2. Follow the money</h2>
+    <label for="start">Start with (USD)</label>
+    <input id="start" type="number" value="1000" min="0" style="max-width:160px">
+    <div class="money" id="money"></div>
+    <div class="verdict" id="verdict"></div>
+    <h2 style="margin-top:24px">3. Why logarithms help</h2>
+    <p style="color:var(--muted);margin-top:0">Multiplying rates becomes adding weights, where weight = -log(rate). Teal bars go left of the line (negative weight, a gain). Grey bars go right (a cost).</p>
+    <div id="weights"></div>
+    <p id="logtext" style="margin-bottom:0"></p>
+  </section>
+</main>
+<script src="visual.js"></script>
+</body>
+</html>

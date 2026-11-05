@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forex Arbitrage Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Forex arbitrage simulator</h1>
+  <p>Bellman-Ford on <code>-log(rate)</code> weights. A negative cycle means the product of exchange rates around a loop is greater than 1.</p>
+  <nav aria-label="Pages">
+    <a href="index.html" class="active" aria-current="page">Simulator</a>
+    <a href="live.html">Live market</a>
+    <a href="visual.html">Visual explainer</a>
+    <a href="theory.html">Theory</a>
+  </nav>
+</header>
+
+<main>
+  <section class="panel" id="inputs">
+    <h2>Market data</h2>
+    <label for="cur">Currencies (separated by spaces)</label>
+    <input id="cur" value="USD EUR GBP">
+
+    <h3>Trading pairs</h3>
+    <table id="pairs">
+      <thead><tr><th>Base</th><th>Quote</th><th>Bid</th><th>Ask</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row">
+      <button id="addPair" class="ghost">Add pair</button>
+      <select id="preset">
+        <option value="arb">Sample: arbitrage exists</option>
+        <option value="none">Sample: no arbitrage</option>
+        <option value="four">Sample: 4 currencies</option>
+      </select>
+      <button id="loadPreset" class="ghost">Load sample</button>
+    </div>
+    <p id="msg" role="alert"></p>
+    <button id="build" class="primary">Build graph and start</button>
+  </section>
+
+  <section class="panel" id="sim">
+    <h2>Simulation</h2>
+    <svg id="graph" viewBox="0 0 520 420" role="img" aria-label="Currency graph"></svg>
+    <div class="row controls">
+      <button id="play" class="primary" disabled>Play</button>
+      <button id="step" disabled>Step</button>
+      <button id="finish" disabled>Run to end</button>
+      <button id="reset" class="ghost" disabled>Reset</button>
+      <label class="speed">Delay <input id="speed" type="range" min="50" max="1200" value="500"></label>
+    </div>
+    <p id="log">Enter data and press "Build graph and start".</p>
+  </section>
+
+  <section class="panel" id="state">
+    <h2>Distances</h2>
+    <table id="dist"><thead><tr><th>Currency</th><th>dist</th><th>Best multiplier</th></tr></thead><tbody></tbody></table>
+    <h2>Result</h2>
+    <div id="result">Run the simulation to see the result.</div>
+  </section>
+</main>
+<script src="algo.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

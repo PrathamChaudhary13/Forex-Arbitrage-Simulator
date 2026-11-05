@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theory - Forex arbitrage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Forex arbitrage simulator</h1>
+  <p>Bellman-Ford on <code>-log(rate)</code> weights. A negative cycle means the product of exchange rates around a loop is greater than 1.</p>
+  <nav aria-label="Pages">
+    <a href="index.html">Simulator</a>
+    <a href="live.html">Live market</a>
+    <a href="visual.html">Visual explainer</a>
+    <a href="theory.html" class="active" aria-current="page">Theory</a>
+  </nav>
+</header>
+<div class="page">
+<h2>What is arbitrage?</h2>
+<p>Arbitrage means making a risk-free profit from price differences. In currency markets, <b>triangular arbitrage</b> is a loop of trades such as USD → EUR → GBP → USD that ends with more money than you started with, because the quoted rates are slightly inconsistent.</p>
+
+<h2>Step 1: model the market as a graph</h2>
+<p>Every currency is a <b>vertex</b>. Every possible trade is a <b>directed edge</b> labelled with the exchange rate. A loop of trades is a cycle in this graph.</p>
+<p>A quoted pair has two prices. With a pair <code>Base/Quote</code> quoted at bid and ask:</p>
+<table>
+<tr><th>Trade</th><th>Meaning</th><th>Rate on the edge</th></tr>
+<tr><td>Base → Quote</td><td>sell the base currency</td><td>bid</td></tr>
+<tr><td>Quote → Base</td><td>buy the base currency</td><td>1 / ask</td></tr>
+</table>
+<p>Because bid ≤ ask, trading back and forth always loses a little (the spread). Arbitrage appears only when the rates around a loop do not line up by more than the spread.</p>
+
+<h2>Step 2: turn a product into a sum</h2>
+<p>Going around a cycle multiplies the rates. Money grows if the product is above 1:</p>
+<div class="formula">r<sub>1</sub> × r<sub>2</sub> × … × r<sub>k</sub> &gt; 1</div>
+<p>Shortest-path algorithms add weights, they do not multiply. Taking logarithms fixes this, since log(a × b) = log a + log b. Using a minus sign flips the inequality:</p>
+<div class="formula">w = −log(r)<br>r<sub>1</sub> × … × r<sub>k</sub> &gt; 1 &nbsp;⇔&nbsp; w<sub>1</sub> + … + w<sub>k</sub> &lt; 0</div>
+<p>So <b>arbitrage exists exactly when the graph has a negative-weight cycle</b>.</p>
+<div class="note"><b>Worked example.</b> Rates 0.90, 0.86 and 1.30 give a product of 1.0062. The weights are 0.10536, 0.15082 and −0.26236, which sum to −0.00618. Since e<sup>0.00618</sup> ≈ 1.0062, the profit is 0.62% per loop.</div>
+
+<h2>Step 3: Bellman-Ford</h2>
+<p>Bellman-Ford finds shortest paths even with negative edges, and it can detect negative cycles. It keeps a distance value <code>dist[v]</code> for each vertex.</p>
+<ol>
+<li><b>Initialise.</b> Set every <code>dist[v] = 0</code>. Starting everything at 0 (instead of one source at 0 and the rest at infinity) lets the algorithm find a negative cycle anywhere in the graph, even if it is not reachable from one chosen currency.</li>
+<li><b>Relax V−1 times.</b> In each pass, look at every edge u → v with weight w. If <code>dist[u] + w &lt; dist[v]</code>, update <code>dist[v]</code> and remember that u improved it (<code>parent</code>). This is called <b>relaxation</b>.</li>
+<li><b>Detection pass.</b> Without a negative cycle, the distances are final after V−1 passes, because a shortest path has at most V−1 edges. So if any edge can still be relaxed on the V-th pass, a negative cycle exists.</li>
+<li><b>Extract the cycle.</b> The vertex that was just relaxed may only lead into the cycle. Follow the parent links V times to be sure you are inside it, then keep following them until you return to the same vertex. Reverse the list to get the trade order.</li>
+<li><b>Compute the profit.</b> Multiply the rates along the cycle and subtract 1.</li>
+</ol>
+
+<h2>Complexity</h2>
+<table>
+<tr><th>Quantity</th><th>Value</th></tr>
+<tr><td>Vertices V</td><td>number of currencies</td></tr>
+<tr><td>Edges E</td><td>2 × number of pairs (one bid edge, one ask edge)</td></tr>
+<tr><td>Time</td><td>O(V · E)</td></tr>
+<tr><td>Space</td><td>O(V + E)</td></tr>
+</table>
+
+<h2>Implementation details that matter</h2>
+<ul>
+<li><b>Store the edge, not just the parent vertex.</b> Bid and ask edges can run between the same two currencies, so the parent must record which edge improved the node. Otherwise the profit may be computed from the wrong edge.</li>
+<li><b>Use a small epsilon.</b> Floating-point rounding can create fake negative cycles, so an update only counts if it improves the distance by more than 1e-12.</li>
+<li><b>Validate input.</b> Rates must be positive (log is undefined otherwise), currency names must exist, and bid must not exceed ask.</li>
+</ul>
+
+<h2>Limitations</h2>
+<ul>
+<li>The model ignores fees, trade size limits and the time it takes to execute trades. Real arbitrage disappears in milliseconds.</li>
+<li>Only one cycle is reported, though several may exist.</li>
+</ul>
+</div>
+</body>
+</html>
